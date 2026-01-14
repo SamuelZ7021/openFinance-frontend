@@ -1,45 +1,74 @@
-// Archivo: src/pages/Dashboard.tsx
+// Archivo: src/pages/dashboard/Dashboard.tsx
+import { useEffect, useState } from 'react';
+import { useAccountStore } from '../../store/useAccountStore';
 import { useUIStore } from '../../store/useUIStore';
-import { Eye, EyeOff } from 'lucide-react';
 import { AccountCard } from '../../components/dashboard/AccountCard';
-import { RecentTransactions } from '../../components/dashboard/RecentTransactions';
-export const Dashboard = () => {
-  const { isPrivacyMode, togglePrivacy } = useUIStore();
+import { TransferModal } from '../../components/dashboard/TransferModal';
+import { Eye, EyeOff, Loader2, Plus } from 'lucide-react';
 
-  // Mock data - En el siguiente paso lo conectaremos a tu backend con Axios
-  const mockTransactions = [
-    { id: 1, description: 'Amazon Web Services', amount: '120.00', type: 'DEBIT', date: 'Today, 2:45 PM', isReversal: false },
-    { id: 2, description: 'Internal Transfer', amount: '2,500.00', type: 'CREDIT', date: 'Yesterday', isReversal: false },
-    { id: 3, description: 'REVERSAL: AWS Overcharge', amount: '120.00', type: 'CREDIT', date: '2 days ago', isReversal: true },
-  ];
+export const Dashboard = () => {
+  const [isTransferOpen, setIsTransferOpen] = useState(false);
+  const { isPrivacyMode, togglePrivacy } = useUIStore();
+  const { accounts, fetchAccounts, isLoading, error } = useAccountStore();
+
+  useEffect(() => {
+    fetchAccounts();
+  }, [fetchAccounts]);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-slate-950">
+        <Loader2 className="text-blue-500 animate-spin" size={40} />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-12">
+    <div className="min-h-screen bg-slate-950 p-8 text-white">
+      {/* Botón Flotante */}
+      <button 
+        onClick={() => setIsTransferOpen(true)}
+        className="fixed bottom-8 right-8 bg-blue-600 p-4 rounded-full shadow-2xl hover:scale-110 transition-all z-40"
+      >
+        <Plus size={32} />
+      </button>
+
+      <TransferModal 
+        isOpen={isTransferOpen} 
+        onClose={() => setIsTransferOpen(false)} 
+      />
+
+      <div className="mx-auto max-w-6xl">
+        <header className="mb-12 flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-black text-white tracking-tight">OpenFinance<span className="text-blue-500">.</span></h1>
-            <p className="text-slate-500 mt-1 font-medium">Core Banking System v1.0</p>
+            <h1 className="text-3xl font-bold tracking-tight">OpenFinance<span className="text-blue-500">.</span></h1>
+            <p className="text-slate-400">Panel de Control de Activos</p>
           </div>
-          
           <button 
             onClick={togglePrivacy}
-            className="flex items-center gap-3 px-6 py-3 bg-slate-900 border border-slate-800 rounded-2xl text-slate-300 hover:text-white hover:border-slate-600 transition-all shadow-xl"
+            className="flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800 px-6 py-2 text-sm font-bold text-slate-300 hover:text-white transition-all"
           >
-            {isPrivacyMode ? <EyeOff size={20} /> : <Eye size={20} />}
-            <span className="text-sm font-bold tracking-wide">
-              {isPrivacyMode ? 'REVEAL BALANCES' : 'HIDE BALANCES'}
-            </span>
+            {isPrivacyMode ? <EyeOff size={18} /> : <Eye size={18} />}
+            {isPrivacyMode ? 'REVELAR' : 'OCULTAR'}
           </button>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <AccountCard accountNumber="8822334411" balance={45800.50} type="Main Assets" trend={2.4} />
-          <AccountCard accountNumber="1122334455" balance={1200.00} type="Cash Reserve" trend={-0.8} />
-          <AccountCard accountNumber="9900112233" balance={89430.20} type="Investment" trend={12.5} />
-        </div>
+        {error && (
+          <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/50 rounded-2xl text-rose-400 text-sm">
+            {error}
+          </div>
+        )}
 
-        <RecentTransactions transactions={mockTransactions} />
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {accounts.map((acc) => (
+            <AccountCard 
+              key={acc.id}
+              accountNumber={acc.accountNumber}
+              balance={acc.balance}
+              type={acc.type}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

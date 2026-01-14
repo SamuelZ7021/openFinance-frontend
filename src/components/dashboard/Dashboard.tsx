@@ -1,11 +1,12 @@
 // Archivo: src/components/dashboard/Dashboard.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { useUIStore } from '../../store/useUIStore';
 import { AccountCard } from './AccountCard';
 import { Eye, EyeOff } from 'lucide-react';
 
 export const Dashboard = () => {
   const { isPrivacyMode, togglePrivacy } = useUIStore();
+  const [isTransferOpen, setIsTransferOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-slate-950 p-8 text-white">
@@ -25,7 +26,7 @@ export const Dashboard = () => {
         </header>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <AccountCard accountNumber="8822334411" balance={45800.50} type="Main Assets" history={[{value: 10}, {value: 20}]} />
+          <AccountCard accountNumber="8822334411" balance={45800.50} type="Main Assets" />
           {/* Agregaremos más aquí conforme conectemos la API */}
         </div>
       </div>
