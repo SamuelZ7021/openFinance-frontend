@@ -1,7 +1,6 @@
 # OpenFinance Engine (Banking Core) 🏦
 
 ![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.2-green) ![React](https://img.shields.io/badge/React-18-blue) ![Architecture](https://img.shields.io/badge/Architecture-Hexagonal-purple)
-
 ## 📋 Project Overview
 
 **OpenFinance Engine** is a robust, modular banking core simulation built to demonstrate **Enterprise-grade** software architecture. It handles sensitive financial operations with strict ACID compliance, auditability, and security.

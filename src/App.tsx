@@ -1,35 +1,44 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/App.tsx
+import { useEffect } from 'react';
+import { useAuthStore } from './store/useAuthStore';
+import apiClient from './api/axiosClient';
+import { LoginForm } from './components/auth/LoginForm';
+import { Dashboard } from './components/dashboard/Dashboard';
+import { Router } from 'lucide-react';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { accessToken, isInitializing, setAccessToken, logout } = useAuthStore();
+
+  useEffect(() => {
+    const handshake = async () => {
+      try {
+        // Al cargar, forzamos un refresh para recuperar la sesión
+        const { data } = await apiClient.post('/auth/refresh');
+        setAccessToken(data.accessToken);
+      } catch (err) {
+        // Si falla (ej: no hay cookie), simplemente terminamos la inicialización
+        logout(); 
+      }
+    };
+    handshake();
+  }, []);
+
+  // Pantalla de carga profesional para evitar el flicker
+  if (isInitializing) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-slate-950">
+        <div className="animate-pulse text-blue-500 font-bold text-xl">
+          OpenFinance Engine...
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Router>
+      {!accessToken ? <PublicRoutes /> : <PrivateRoutes />}
+    </Router>
+  );
 }
 
-export default App
+export default App;
