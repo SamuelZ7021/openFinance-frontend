@@ -6,14 +6,13 @@ import { UserPlus, Mail, Lock, Loader2 } from 'lucide-react';
 export const RegisterForm = ({ onSwitchToLogin }: { onSwitchToLogin: () => void }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
   const { register, isLoading, error } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       // Envía email y password al DTO RegisterRequest
-      await register(email, username, password);
+      await register(email, password);
       alert('Cuenta creada con éxito. Ahora puedes iniciar sesión.');
       onSwitchToLogin();
     } catch (err) {
@@ -40,18 +39,6 @@ export const RegisterForm = ({ onSwitchToLogin }: { onSwitchToLogin: () => void 
               value={email} onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-
-          <div className="relative">
-             <UserPlus className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={20} />
-                <input
-                    type="text"
-                    required
-                    placeholder="Nombre de usuario"
-                    className="w-full rounded-2xl border border-slate-800 bg-slate-800/50 py-4 pl-12 pr-4 text-white placeholder-slate-500 outline-none focus:border-blue-500 transition-all"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    />
-            </div>
 
           <div className="relative">
             <UserPlus className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={20} />

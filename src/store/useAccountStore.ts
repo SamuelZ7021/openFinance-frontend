@@ -1,59 +1,65 @@
-import { create } from "zustand";
-import apiClient from "../api/axiosClient";
+// Archivo: src/store/useAccountStore.ts
+import { create } from 'zustand';
+import apiClient from '../api/axiosClient';
+
+interface TransactionLine {
+  accountId: string;
+  amount: number;
+  type: 'DEBIT' | 'CREDIT';
+}
+
+interface Transaction {
+  id: string;
+  timestamp: string;
+  description: string;
+  lines: TransactionLine[];
+}
 
 interface Account {
-    id: string;
-    accountNumber: string;
-    type: 'ASSET' | 'LIABILITY';
-    balance: number;
-    active: boolean;
+  id: string;
+  accountNumber: string;
+  type: 'ASSET' | 'LIABILITY';
+  balance: number;
+  active: boolean;
+  transactions?: Transaction[]; // Opcional: para guardar el historial por cuenta
 }
 
-interface TransferData {
-    sourceAccountId: string;
-    targetAccountId: string;
-    amount: number;
-    description?: string;
+interface AccountState {
+  accounts: Account[];
+  isLoading: boolean;
+  error: string | null;
+  fetchAccounts: () => Promise<void>;
+  fetchTransactions: (accountId: string) => Promise<Transaction[]>;
 }
 
-interface AccountStore {
-    accounts: Account[];
-    isLoading: boolean;
-    error: string | null;
-    fetchAccounts: () => Promise<void>;
-    executeTransfer: (data: TransferData) => Promise<void>;
-}
+export const useAccountStore = create<AccountState>((set, get) => ({
+  accounts: [],
+  isLoading: false,
+  error: null,
 
-
-export const useAccountStore = create<AccountStore>((set, get) => ({
-    accounts: [],
-    isLoading: false,
-    error: null,
-    fetchAccounts: async () => {
-        set({ isLoading: true, error: null });
-        try {
-            const response = await apiClient.get<Account[]>("/api/v1/accounts");
-            set({ accounts: response.data, isLoading: false });
-        } catch (err: any ) {
-            set({ error: err.response?.data?.detail || 'Error fetching accounts',
-            isLoading: false });
-        }
-    },
-
-    executeTransfer: async (data) => {
-    set({ isLoading: true });
+  fetchAccounts: async () => {
+    set({ isLoading: true, error: null });
     try {
-      await apiClient.post('/transfers', {
-        ...data,
-        // Generamos la Idempotency Key en el cliente
-        idempotencyKey: crypto.randomUUID()
-      });
-      // Refrescamos las cuentas para ver los nuevos saldos
-      await get().fetchAccounts();
+      const response = await apiClient.get<Account[]>('/accounts');
+      // Obtenemos las cuentas y cargamos las transacciones para cada una en paralelo
+      const accountsWithData = await Promise.all(response.data.map(async (acc) => {
+        const txs = await get().fetchTransactions(acc.id);
+        return { ...acc, transactions: txs };
+      }));
+      set({ accounts: accountsWithData, isLoading: false });
     } catch (err: any) {
-      throw new Error(err.response?.data?.detail || 'Error en la transferencia');
-    } finally {
-      set({ isLoading: false });
+      set({ error: 'Fallo de conexión con el Ledger', isLoading: false });
+    }
+  },
+
+  fetchTransactions: async (accountId: string) => {
+    try {
+      // Llamada al TransactionController
+      const response = await apiClient.get<Transaction[]>(`/transactions/${accountId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error cargando TX para ${accountId}`, error);
+      return [];
     }
   },
 }));

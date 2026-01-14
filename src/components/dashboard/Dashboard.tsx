@@ -1,8 +1,10 @@
 // Archivo: src/components/dashboard/Dashboard.tsx
+'use client'
 import React, { useState } from 'react';
 import { useUIStore } from '../../store/useUIStore';
 import { AccountCard } from './AccountCard';
 import { Eye, EyeOff } from 'lucide-react';
+import { useAuthStore } from '../../store/useAuthStore';
 
 export const Dashboard = () => {
   const { isPrivacyMode, togglePrivacy } = useUIStore();
@@ -13,7 +15,7 @@ export const Dashboard = () => {
       <div className="mx-auto max-w-6xl">
         <header className="mb-12 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Hola, Samuel</h1>
+            <h1 className="text-3xl font-bold">Hola, {useAuthStore.getState().user?.name || 'Usuario'}</h1>
             <p className="text-slate-400">Resumen de tu infraestructura financiera</p>
           </div>
           <button 
@@ -26,7 +28,7 @@ export const Dashboard = () => {
         </header>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <AccountCard accountNumber="8822334411" balance={45800.50} type="Main Assets" />
+          <AccountCard accountNumber="8822334411" balance={45800.50} type="Main Assets" history={[]} />
           {/* Agregaremos más aquí conforme conectemos la API */}
         </div>
       </div>

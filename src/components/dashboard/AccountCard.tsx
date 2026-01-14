@@ -8,6 +8,7 @@ interface AccountCardProps {
   balance: number;
   type: string;
   trend?: number; // Porcentaje de cambio para el dashboard
+  history: { value: number }[];
 }
 
 export const AccountCard = ({ accountNumber, balance, type, trend }: AccountCardProps) => {
