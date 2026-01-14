@@ -1,20 +1,22 @@
 // Archivo: src/components/auth/RegisterForm.tsx
 import React, { useState } from 'react';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useAlert } from '../../hooks/useAlert';
 import { UserPlus, Mail, Lock, Loader2 } from 'lucide-react';
 
 export const RegisterForm = ({ onSwitchToLogin }: { onSwitchToLogin: () => void }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { register, isLoading, error } = useAuthStore();
+  const { success } = useAlert();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       // Envía email y password al DTO RegisterRequest
       await register(email, password);
-      alert('Cuenta creada con éxito. Ahora puedes iniciar sesión.');
-      onSwitchToLogin();
+      success('Cuenta creada', 'Ya puedes iniciar sesión con tu email y contraseña');
+      setTimeout(onSwitchToLogin, 1000);
     } catch (err) {
       // El error se captura en el store
     }

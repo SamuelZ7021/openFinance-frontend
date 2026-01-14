@@ -3,8 +3,10 @@ import axios from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api/v1',
+  baseURL: 'http://localhost:8080/',
   withCredentials: true,
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
 });
 
 let isRefreshing = false;

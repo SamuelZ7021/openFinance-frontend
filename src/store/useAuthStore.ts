@@ -1,57 +1,82 @@
-// Archivo: src/store/useAuthStore.ts
+// src/store/useAuthStore.ts
 import { create } from 'zustand';
 import apiClient from '../api/axiosClient';
 
 interface AuthState {
-  [x: string]: any;
   accessToken: string | null;
   isAuthenticated: boolean;
   isInitializing: boolean;
   isLoading: boolean;
   error: string | null;
-  setAccessToken: (token: string | null) => void;
-  setInitializing: (val: boolean) => void;
-  logout: () => void;
-  // FIX: Removido username para coincidir con el backend
+  login: (credentials: { email: string; password: string }) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
+  checkAuth: () => Promise<void>;
+  logout: () => Promise<void>;
+  setAccessToken: (token: string | null) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  isLoading: false,
-  error: null,
   accessToken: null,
   isAuthenticated: false,
-  isInitializing: true,
+  isInitializing: true, // Empezamos en true para que los Guards esperen
+  isLoading: false,
+  error: null,
+
+  login: async (credentials) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { data } = await apiClient.post('/api/v1/auth/login', credentials);
+      set({ 
+        accessToken: data.accessToken, 
+        isAuthenticated: true, 
+        isLoading: false 
+      });
+    } catch (error: any) {
+      set({ 
+        error: error.response?.data?.message || 'Error de autenticación', 
+        isLoading: false 
+      });
+      throw error;
+    }
+  },
+
   checkAuth: async () => {
     try {
-      // Intentamos obtener un nuevo access token usando la cookie httpOnly
-      const response = await apiClient.post('/auth/refresh');
+      // El backend debe responder con un nuevo accessToken si la cookie refresh_token es válida
+      const { data } = await apiClient.post('/api/v1/auth/refresh');
       set({ 
-        accessToken: response.data.accessToken, 
+        accessToken: data.accessToken, 
         isAuthenticated: true, 
         isInitializing: false 
       });
-    } catch (error) {
-      // Si falla (no hay cookie), limpiamos todo
+    } catch {
       set({ accessToken: null, isAuthenticated: false, isInitializing: false });
     }
   },
-  setAccessToken: (token) => set({ 
-    accessToken: token, 
-    isAuthenticated: !!token,
-    isInitializing: false 
-  }),
-  setInitializing: (val) => set({ isInitializing: val }),
-  logout: () => set({ 
-    accessToken: null, 
-    isAuthenticated: false,
-    isInitializing: false 
-  }),
-  register: async (email, password) => {
+
+  logout: async () => {
     set({ isLoading: true, error: null });
     try {
-      // Solo enviamos email y password como espera el backend
-      await apiClient.post('/auth/register', { email, password });
+      // Llamar al backend para invalidar la sesión
+      await apiClient.post('/api/v1/auth/logout');
+    } catch (error) {
+      // Incluso si falla, limpiamos el estado local
+      console.error('Error al logout:', error);
+    } finally {
+      set({ 
+        accessToken: null, 
+        isAuthenticated: false,
+        isLoading: false,
+        isInitializing: false
+      });
+    }
+  },
+
+  register: async (email: string, password: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      // Enviamos email y password como espera el backend
+      await apiClient.post('/api/v1/auth/register', { email, password });
       set({ isLoading: false });
     } catch (error: any) {
       set({ 
@@ -61,4 +86,6 @@ export const useAuthStore = create<AuthState>((set) => ({
       throw error;
     }
   },
+
+  setAccessToken: (token) => set({ accessToken: token, isAuthenticated: !!token })
 }));
