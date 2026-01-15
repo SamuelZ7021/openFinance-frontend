@@ -935,12 +935,6 @@ style: Formatear código según ESLint
 
 ---
 
-## 📄 Licencia
-
-MIT License - Ver archivo LICENSE para más detalles
-
----
-
 ## 👨‍💻 Autor
 
 **Samuel Zapata**  
