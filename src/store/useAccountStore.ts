@@ -8,7 +8,8 @@ interface AccountState {
   isLoading: boolean;
   error: string | null;
   fetchAccounts: () => Promise<void>;
-  executeTransfer: (data: { sourceAccountId: string; targetAccountId: string; amount: number; description: string }) => Promise<void>;
+  refreshAccounts: () => Promise<void>;
+  executeTransfer: (data: { sourceAccountId: string; targetAccountNumber: string; amount: number; description: string }) => Promise<void>;
   createAccount: (accountData: { accountNumber: string; type?: string }) => Promise<void>;
   deleteAccount: (id: string) => Promise<void>;
 }
@@ -17,7 +18,18 @@ export const useAccountStore = create<AccountState>((set, get) => ({
   accounts: [],
   isLoading: false,
   error: null,
-  
+
+  refreshAccounts: async () => {
+    // Background refresh without setting isLoading
+    try {
+      const data = await accountService.getAccountSumary();
+      set({ accounts: data });
+    } catch (err: any) {
+      // Slient fail or log to console, don't disrupt UI with error state for background sync
+      console.error('Background sync failed:', err);
+    }
+  },
+
   fetchAccounts: async () => {
     set({ isLoading: true, error: null });
     try {
@@ -28,7 +40,7 @@ export const useAccountStore = create<AccountState>((set, get) => ({
     }
   },
 
-  executeTransfer: async (transferData) => {
+  executeTransfer: async (transferData: { sourceAccountId: string; targetAccountNumber: string; amount: number; description: string }) => {
     set({ isLoading: true, error: null });
     try {
       await accountService.transferFunds(transferData);

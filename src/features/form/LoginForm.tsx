@@ -1,95 +1,144 @@
 // src/components/auth/LoginForm.tsx
 import React, { useState } from 'react';
 import { useAuthStore } from '../../store/useAuthStore';
-import { Lock, Mail, Loader2, AlertCircle } from 'lucide-react';
+import { Lock, Mail, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 export const LoginForm = ({ onSwitchToRegister }: { onSwitchToRegister: () => void }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login, isLoading, error } = useAuthStore();
+  const { login, isLoading, error: authError } = useAuthStore();
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLocalError(null);
+
+    // Custom Validation
+    if (!email) {
+      setLocalError('El correo corporativo es obligatorio');
+      return;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setLocalError('Por favor ingrese un correo válido');
+      return;
+    }
+    if (!password) {
+      setLocalError('La contraseña es obligatoria');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await login({ email, password });
-      // La redirección ocurrirá automáticamente por el cambio de estado y el Router
-      // Mantener isSubmitting en true para mostrar loading mientras navega
     } catch (err) {
       setIsSubmitting(false);
-      // El error ya se gestiona en el store
     }
   };
 
-  return (
-    <div className={`w-full max-w-md space-y-8 rounded-3xl border border-slate-800 bg-slate-900/50 p-8 backdrop-blur-xl shadow-2xl transition-all duration-300 ${
-      isSubmitting ? 'opacity-50 scale-95' : 'opacity-100 scale-100'
-    }`}>
-      <div className="text-center">
-        <h2 className="text-4xl font-black text-white tracking-tighter">
-          OpenFinance<span className="text-blue-500">.</span>
-        </h2>
-        <p className="mt-2 text-slate-400 font-medium">Acceso al Sistema Central de Ledger</p>
-      </div>
-      
-      <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-        {error && !isSubmitting && (
-          <div className="flex items-center gap-2 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm animate-shake">
-            <AlertCircle size={18} />
-            {error}
-          </div>
-        )}
+  const error = localError || authError;
+  const loading = isLoading || isSubmitting;
 
-        <div className="space-y-4">
-          <div className="group relative">
-            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors" size={20} />
+  return (
+    <div className="w-full animate-fade-in-up">
+      <div className="mb-8 text-center sm:text-left">
+        <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Bienvenido</h2>
+        <p className="text-slate-500 mt-2">Accede a tu panel empresarial</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+        {/* Email Field */}
+        <div className="space-y-1.5">
+          <label className="text-sm font-semibold text-slate-700 ml-1">
+            Correo Corporativo
+          </label>
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Mail className="h-5 w-5 text-slate-400 group-focus-within:text-emerald-600 transition-colors" />
+            </div>
             <input
-              type="email" required
-              disabled={isSubmitting || isLoading}
-              className="w-full rounded-2xl border border-slate-700 bg-slate-800/40 py-4 pl-12 pr-4 text-white placeholder-slate-500 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all disabled:opacity-60"
-              placeholder="correo@ejemplo.com"
-              value={email} onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="group relative">
-            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors" size={20} />
-            <input
-              type="password" required
-              disabled={isSubmitting || isLoading}
-              className="w-full rounded-2xl border border-slate-700 bg-slate-800/40 py-4 pl-12 pr-4 text-white placeholder-slate-500 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all disabled:opacity-60"
-              placeholder="••••••••"
-              value={password} onChange={(e) => setPassword(e.target.value)}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={`block w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium ${localError && localError.includes('correo') ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-500/20' : ''
+                }`}
+              placeholder="nombre@empresa.com"
+              required
+              disabled={loading}
             />
           </div>
         </div>
 
+        {/* Password Field */}
+        <div className="space-y-1.5">
+          <div className="flex justify-between items-center ml-1">
+            <label className="text-sm font-semibold text-slate-700">Contraseña</label>
+            <button type="button" className="text-xs font-medium text-emerald-600 hover:text-emerald-500">
+              ¿Olvidaste tu contraseña?
+            </button>
+          </div>
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Lock className="h-5 w-5 text-slate-400 group-focus-within:text-emerald-600 transition-colors" />
+            </div>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={`block w-full pl-11 pr-12 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium ${localError && localError.includes('contraseña') ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-500/20' : ''
+                }`}
+              placeholder="••••••••"
+              required
+              disabled={loading}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+              disabled={loading}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="p-4 rounded-xl bg-rose-50 border border-rose-100 flex items-start gap-3 animate-shake">
+            <AlertCircle className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
+            <p className="text-sm text-rose-700 font-medium">{error}</p>
+          </div>
+        )}
+
         <button
-          type="submit" 
-          disabled={isLoading || isSubmitting}
-          className="relative flex w-full items-center justify-center overflow-hidden rounded-2xl bg-blue-600 py-4 font-bold text-white hover:bg-blue-500 active:scale-[0.98] disabled:opacity-50 transition-all"
+          type="submit"
+          disabled={loading}
+          className="w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-lg shadow-emerald-600/20 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all active:scale-[0.98] disabled:opacity-60"
         >
-          {isLoading || isSubmitting ? (
-            <>
-              <Loader2 className="animate-spin" />
-              <span className="ml-2">Entrando...</span>
-            </>
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              Verificando...
+            </span>
           ) : (
             'Acceder al Panel'
           )}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-500 font-medium">
-        ¿Nuevo en el Ledger?{' '}
-        <button 
-          onClick={onSwitchToRegister} 
-          disabled={isSubmitting || isLoading}
-          className="text-blue-500 hover:text-blue-400 font-bold underline-offset-4 hover:underline disabled:opacity-50 transition-colors"
-        >
-          Crea tu cuenta
-        </button>
-      </p>
+      <div className="mt-8 text-center">
+        <p className="text-slate-500 text-sm">
+          ¿No tienes una cuenta corporativa?{' '}
+          <button
+            onClick={onSwitchToRegister}
+            disabled={loading}
+            className="font-bold text-emerald-600 hover:text-emerald-500 transition-colors"
+          >
+            Registrar Empresa
+          </button>
+        </p>
+      </div>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 // src/App.tsx
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/useAuthStore';
 import { ProtectedRoute } from './guards/ProtectedRoute';
@@ -8,24 +8,9 @@ import DashboardPage from './pages/dashboard/DashboardPage';
 import { DashboardProfile } from './pages/dashboard/DashboardProfile';
 import AccountsPage from './pages/accounts/AccountsPage';
 import AnalyticsPage from './pages/analytics/AnalyticsPage';
-import { LoginForm } from './features/form/LoginForm';
-import { RegisterForm } from './features/form/RegisterForm';
+import InvestmentsPage from './pages/investments/InvestmentsPage';
+import AuthPage from './pages/auth/AuthPage';
 import AlertContainer from './components/AlertContainer';
-
-// Componente para manejar el cambio entre login y register
-function AuthPage() {
-  const [isLogin, setIsLogin] = useState(true);
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
-      {isLogin ? (
-        <LoginForm onSwitchToRegister={() => setIsLogin(false)} />
-      ) : (
-        <RegisterForm onSwitchToLogin={() => setIsLogin(true)} />
-      )}
-    </div>
-  );
-}
 
 export function App() {
   const checkAuth = useAuthStore(state => state.checkAuth);
@@ -50,6 +35,7 @@ export function App() {
           <Route path="/dashboard/profile" element={<DashboardProfile />} />
           <Route path="/accounts" element={<AccountsPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/investments" element={<InvestmentsPage />} />
           {/* Redirección por defecto dentro del área protegida */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Route>

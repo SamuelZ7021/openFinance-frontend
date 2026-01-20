@@ -19,10 +19,10 @@ export const AccountAnalytics: React.FC<AccountAnalyticsProps> = ({ accounts }) 
     (acc, account) => {
       const txs = account.transactions || [];
       const income = txs
-        .filter(tx => tx.description?.toLowerCase().includes('ingreso'))
+        .filter(tx => tx.category === 'CREDIT')
         .reduce((sum, tx) => sum + tx.amount, 0);
       const expenses = txs
-        .filter(tx => tx.description?.toLowerCase().includes('gasto'))
+        .filter(tx => tx.category === 'DEBIT')
         .reduce((sum, tx) => sum + tx.amount, 0);
       return {
         totalIncome: acc.totalIncome + income,
@@ -46,19 +46,19 @@ export const AccountAnalytics: React.FC<AccountAnalyticsProps> = ({ accounts }) 
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Total Balance */}
-        <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-2xl p-6">
+        <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/20 border border-blue-500/10 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-slate-400 text-sm font-semibold uppercase">Saldo Total</h3>
+            <h3 className="text-slate-700 text-sm font-semibold uppercase">Saldo Total</h3>
             <DollarSign size={20} className="text-blue-500" />
           </div>
-          <p className="text-3xl font-bold text-white">{formatAmount(totalBalance)}</p>
-          <p className="text-xs text-slate-500 mt-2">{accounts.length} cuenta(s) activa(s)</p>
+          <p className="text-3xl font-bold text-blue-400">{formatAmount(totalBalance)}</p>
+          <p className="text-sm text-slate-700 mt-2">{accounts.length} cuenta(s) activa(s)</p>
         </div>
 
         {/* Net Balance */}
         <div className={`bg-gradient-to-br ${netBalance >= 0 ? 'from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20' : 'from-rose-500/10 to-rose-600/5 border border-rose-500/20'} rounded-2xl p-6`}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-slate-400 text-sm font-semibold uppercase">Balance Neto</h3>
+            <h3 className="text-slate-700 text-sm font-semibold uppercase">Balance Neto</h3>
             {netBalance >= 0 ? (
               <TrendingUp size={20} className="text-emerald-500" />
             ) : (
@@ -68,7 +68,7 @@ export const AccountAnalytics: React.FC<AccountAnalyticsProps> = ({ accounts }) 
           <p className={`text-3xl font-bold ${netBalance >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
             {formatAmount(netBalance)}
           </p>
-          <p className="text-xs text-slate-500 mt-2">
+          <p className="text-sm text-slate-600 mt-2">
             {totalTransactions} transacción(es)
           </p>
         </div>
@@ -76,21 +76,21 @@ export const AccountAnalytics: React.FC<AccountAnalyticsProps> = ({ accounts }) 
         {/* Ingresos */}
         <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-slate-400 text-sm font-semibold uppercase">Ingresos</h3>
+            <h3 className="text-slate-700 text-sm font-semibold uppercase">Ingresos</h3>
             <TrendingUp size={20} className="text-emerald-500" />
           </div>
           <p className="text-3xl font-bold text-emerald-400">{formatAmount(totalIncome)}</p>
-          <p className="text-xs text-slate-500 mt-2">Este período</p>
+          <p className="text-sm text-slate-600 mt-2">Este período</p>
         </div>
 
         {/* Gastos */}
         <div className="bg-gradient-to-br from-rose-500/10 to-rose-600/5 border border-rose-500/20 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-slate-400 text-sm font-semibold uppercase">Gastos</h3>
+            <h3 className="text-slate-700 text-sm font-semibold uppercase">Gastos</h3>
             <TrendingDown size={20} className="text-rose-500" />
           </div>
           <p className="text-3xl font-bold text-rose-400">{formatAmount(totalExpenses)}</p>
-          <p className="text-xs text-slate-500 mt-2">Este período</p>
+          <p className="text-sm text-slate-600 mt-2">Este período</p>
         </div>
       </div>
 
@@ -106,7 +106,7 @@ export const AccountAnalytics: React.FC<AccountAnalyticsProps> = ({ accounts }) 
                 <div key={account.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 transition-colors">
                   <div>
                     <p className="text-white font-medium">Cuenta {account.accountNumber.slice(-4)}</p>
-                    <p className="text-xs text-slate-400">{accountTxs.length} transacciones</p>
+                    <p className="text-sm text-slate-300">{accountTxs.length} transacciones</p>
                   </div>
                   <p className="text-white font-semibold">{formatAmount(accountBalance)}</p>
                 </div>

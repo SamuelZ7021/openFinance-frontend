@@ -30,14 +30,14 @@ const AnalyticsPage = () => {
       <div className="space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-white">Análisis Financiero</h1>
-          <p className="text-slate-400 mt-2">Visualiza tu panorama financiero completo</p>
+          <h1 className="text-4xl font-bold text-black">Análisis Financiero</h1>
+          <p className="text-slate-600 mt-2 text-lg">Visualiza tu panorama financiero completo</p>
         </div>
 
         {/* Analytics */}
         {accounts.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 bg-slate-900/40 border border-slate-800 rounded-2xl">
-            <p className="text-slate-400 text-lg">No hay datos para analizar</p>
+            <p className="text-black text-lg">No hay datos para analizar</p>
             <p className="text-slate-500 mt-2">Crea tu primera cuenta para ver análisis detallados</p>
           </div>
         ) : (

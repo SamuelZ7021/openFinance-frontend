@@ -1,13 +1,13 @@
 import { useAlertStore } from '../store/useAlertStore';
 import Alert from './ui/Alert';
-import { useAlert } from '../hooks/useAlert';
+
 
 const AlertContainer = () => {
   const alerts = useAlertStore((state) => state.alerts);
   const removeAlert = useAlertStore((state) => state.removeAlert);
 
   return (
-    <div className="fixed top-4 right-4 space-y-3 z-50 max-w-md pointer-events-none">
+    <div className="fixed top-4 right-4 space-y-3 z-[9999] max-w-md pointer-events-none">
       {alerts.map((alert) => (
         <div key={alert.id} className="pointer-events-auto">
           <Alert

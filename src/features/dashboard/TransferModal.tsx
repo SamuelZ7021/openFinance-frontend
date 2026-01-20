@@ -8,7 +8,7 @@ export const TransferModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: (
   const { success, warning } = useAlert();
   const [formData, setFormData] = useState({
     sourceAccountId: '',
-    targetAccountId: '',
+    targetAccountNumber: '',
     amount: '',
     description: ''
   });
@@ -23,8 +23,8 @@ export const TransferModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: (
       warning('Validación', 'Selecciona una cuenta de origen');
       return;
     }
-    if (!formData.targetAccountId) {
-      warning('Validación', 'Ingresa el ID de la cuenta destino');
+    if (!formData.targetAccountNumber) {
+      warning('Validación', 'Ingresa el Número de Cuenta destino');
       return;
     }
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
@@ -39,16 +39,17 @@ export const TransferModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: (
     try {
       await executeTransfer({
         sourceAccountId: formData.sourceAccountId,
-        targetAccountId: formData.targetAccountId,
+        targetAccountNumber: formData.targetAccountNumber,
         amount: parseFloat(formData.amount),
         description: formData.description
       });
       success('Transferencia completada', `Transferencia de $${parseFloat(formData.amount).toLocaleString()} realizada exitosamente`);
       // Limpiar formulario y cerrar
-      setFormData({ sourceAccountId: '', targetAccountId: '', amount: '', description: '' });
+      setFormData({ sourceAccountId: '', targetAccountNumber: '', amount: '', description: '' });
       onClose();
     } catch (err: any) {
-      warning('Error', err.message || 'Error al procesar la transferencia');
+      const errorMessage = err.response?.data?.message || err.message || 'Error al procesar la transferencia';
+      warning('Error', errorMessage);
     }
   };
 
@@ -82,13 +83,13 @@ export const TransferModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: (
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase">Cuenta Destino (ID)</label>
+            <label className="text-xs font-bold text-slate-500 uppercase">Cuenta Destino (Número)</label>
             <input
               required
-              placeholder="UUID de la cuenta destino"
+              placeholder="Ej: 1234567890"
               className="w-full bg-slate-800 border border-slate-700 rounded-2xl p-4 text-white placeholder-slate-500 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-              value={formData.targetAccountId}
-              onChange={(e) => setFormData({ ...formData, targetAccountId: e.target.value })}
+              value={formData.targetAccountNumber}
+              onChange={(e) => setFormData({ ...formData, targetAccountNumber: e.target.value })}
             />
           </div>
 

@@ -5,7 +5,7 @@ import { CreateAccountModal } from '../../features/dashboard/CreateAccountModal'
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { useAlert } from '../../hooks/useAlert';
 import { useAccountStore } from '../../store/useAccountStore';
-import { Plus, Trash2, Eye } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 
 const AccountsPage = () => {
   const { accounts, fetchAccounts, isLoading, deleteAccount } = useAccountStore();
@@ -60,8 +60,8 @@ const AccountsPage = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">Mis Cuentas</h1>
-            <p className="text-slate-400 mt-2">Gestiona todas tus cuentas financieras</p>
+            <h1 className="text-4xl font-bold text-black">Mis Cuentas</h1>
+            <p className="text-slate-600 mt-2 text-lg">Gestiona todas tus cuentas financieras</p>
           </div>
           <button
             onClick={() => setIsCreateModalOpen(true)}
@@ -75,7 +75,7 @@ const AccountsPage = () => {
         {/* Grid de Cuentas */}
         {accounts.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 bg-slate-900/40 border border-slate-800 rounded-2xl">
-            <p className="text-slate-400 mb-4 text-lg">No tienes cuentas creadas aún</p>
+            <p className="text-black mb-4 text-lg">No tienes cuentas creadas aún</p>
             <button
               onClick={() => setIsCreateModalOpen(true)}
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg transition-all"
@@ -95,15 +95,7 @@ const AccountsPage = () => {
                   history={[]}
                 />
                 {/* Overlay con acciones */}
-                <div className="absolute inset-0 bg-black/60 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                  <button
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg transition-all text-sm"
-                    title="Ver detalles"
-                    disabled
-                  >
-                    <Eye size={16} />
-                    Ver
-                  </button>
+                <div className="absolute inset-0 bg-black/60 rounded-3xl opacity-0 group-hover:opacity-90 transition-opacity flex items-center justify-center gap-3">
                   <button
                     onClick={() => handleDeleteClick(account.id)}
                     className="flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white px-3 py-2 rounded-lg transition-all text-sm"
